@@ -1,56 +1,108 @@
-# Welcome to your Expo app 👋
+# Today
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+<img src="assets/images/icon.png" width="120" alt="Today icon" />
 
-## Get started
+> **Note:** This is a personal hobby project, primarily built with AI assistance (Claude), for my own day-to-day use. Development is driven entirely by what I personally find useful — features get added when I want them, in the order I want them. Issues and PRs are welcome but this will never be a community-roadmapped project.
 
-1. Install dependencies
+A minimal daily task app for Android (and eventually iOS). Open it, see exactly what you need to do, do it, close it.
 
-   ```bash
-   npm install
-   ```
+No dashboards. No onboarding. No clutter.
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+## Features
 
-In the output, you'll find options to open the app in a
+- **Instant task list** — opens straight to today's pending tasks, no extra taps
+- **Pending / Completed tabs** — surface completed tasks to undo them if needed
+- **Four schedule types:**
+  - **Daily** — resets every day at a configurable time
+  - **Days** — repeats on specific days of the week
+  - **One-time** — stays on the list until completed once, then lives in the log
+  - **Interval** — reappears every N hours or minutes since last completion
+- **Task descriptions** — optional notes shown on the task detail screen
+- **Retire** — remove a task from your list permanently while keeping its history
+- **Log tab** — browse all tasks and a full completion history log with search
+- **Per-task history** — calendar view of completions with stats (streak, avg/week, time of day)
+- **Alarm support (Android)** — deadline alarms and on-reset alarms set automatically via the system Clock app
+- **Data export** — share a full JSON dump of all tasks and completions
+- **Offline-first** — everything stored on device via SQLite, no account required
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Tech stack
 
-## Get a fresh project
+| | |
+|---|---|
+| Framework | [Expo](https://expo.dev) SDK 56 / React Native 0.85 |
+| Routing | [Expo Router](https://expo.github.io/router) v3 (file-based) |
+| Storage | [expo-sqlite](https://docs.expo.dev/versions/latest/sdk/sqlite/) |
+| State | [Zustand](https://zustand-demo.pmnd.rs/) |
+| Dates | [Day.js](https://day.js.org/) |
+| Language | TypeScript (strict) |
 
-When you're ready, run:
+---
+
+## Getting started
+
+**Prerequisites:** Node 18+, Android device or emulator.
 
 ```bash
-npm run reset-project
+git clone <repo>
+cd Today
+npm install
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Scan the QR code with [Expo Go](https://expo.dev/go) on your Android device.
 
-### Other setup steps
+> **Note:** Alarm functionality requires a development build due to the `com.android.alarm.permission.SET_ALARM` permission. Run `npx expo run:android` to build locally.
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+---
 
-## Learn more
+## Project structure
 
-To learn more about developing your project with Expo, look at the following resources:
+```
+src/
+  app/                  # Expo Router file-based routes
+    (tabs)/             # Bottom tab screens (Today, Log)
+    task/[id].tsx       # Task detail (from Today tab)
+    history/[id].tsx    # Task history detail (from Log tab)
+    new-task.tsx        # New task modal
+  db/                   # SQLite layer
+    index.ts            # Schema + migrations
+    tasks.ts            # Task CRUD
+    completions.ts      # Completion queries
+    stats.ts            # Streak and stat computation
+    export.ts           # JSON export
+  store/                # Zustand store
+  task-types/           # Task type registry
+    registry.ts         # Type definitions and registry API
+    simple-checkoff/    # First task type (yes/no completion)
+  components/           # Shared UI components
+  constants/            # Theme, color palette, icon set
+  utils/                # Alarm scheduling
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+---
 
-## Join the community
+## Task type system
 
-Join our community of developers creating universal apps.
+Every task renders as the same card on the list screen — `{ name, color, icon }` — regardless of type. Task types own exactly two things:
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- **Detail screen** — the UI shown when you tap a card
+- **History screen** — the UI shown in the Log tab for that task's record
+
+Adding a new task type means creating a folder under `src/task-types/`, implementing both screens, and registering it in `src/task-types/index.ts`. The list screen never changes.
+
+---
+
+## Data model
+
+```sql
+tasks       (id, name, color, icon, description, schedule JSON, required_count,
+             reset_hour, reset_minute, alarm_settings JSON, type, created_at, retired_at)
+
+completions (id, task_id, completed_at, data JSON)
+```
+
+All history is inferred from completion records. Missed days are never written — the absence of a record for a past active day implies a miss. Streaks, averages, and calendar views are computed on read.

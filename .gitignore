@@ -41,3 +41,11 @@ example
 # generated native folders
 /ios
 /android
+
+# AI tooling
+.claude/
+
+# local SQLite database
+*.db
+*.db-shm
+*.db-wal
