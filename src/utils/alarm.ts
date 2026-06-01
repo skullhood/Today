@@ -9,14 +9,9 @@ const EXTRA_MESSAGE   = 'android.intent.extra.alarm.MESSAGE';
 const EXTRA_SKIP_UI   = 'android.intent.extra.alarm.SKIP_UI';
 const EXTRA_VIBRATE   = 'android.intent.extra.alarm.VIBRATE';
 
-// Tracks which alarms have been scheduled this app session to avoid duplicates.
-// Key format: `${taskId}-${YYYY-MM-DD}` for calendar tasks, `${taskId}-interval` for interval tasks.
+// Tracks which calendar-task alarms have been scheduled today.
+// Key: `${taskId}-${YYYY-MM-DD}`
 const scheduled = new Set<string>();
-
-function alarmKey(task: Task): string {
-  if (task.schedule.kind === 'interval') return `${task.id}-interval`;
-  return `${task.id}-${new Date().toISOString().slice(0, 10)}`;
-}
 
 async function fireIntent(hour: number, minute: number, label: string): Promise<void> {
   const extra = {
@@ -30,18 +25,20 @@ async function fireIntent(hour: number, minute: number, label: string): Promise<
       extra: { ...extra, [EXTRA_SKIP_UI]: true },
     });
   } catch {
-    // SKIP_UI unsupported — open Clock UI as fallback
     await IntentLauncher.startActivityAsync(ACTION_SET_ALARM, { extra });
   }
 }
 
+// Called when pending tasks load — schedules deadline/on-reset alarms for calendar tasks.
+// Interval tasks are intentionally excluded; their alarm is set on completion instead.
 export async function scheduleAlarmsForPendingTasks(tasks: Task[]): Promise<void> {
   if (Platform.OS !== 'android') return;
 
   for (const task of tasks) {
     if (!task.alarm_settings) continue;
+    if (task.schedule.kind === 'interval') continue; // handled in scheduleIntervalAlarm
 
-    const key = alarmKey(task);
+    const key = `${task.id}-${new Date().toISOString().slice(0, 10)}`;
     if (scheduled.has(key)) continue;
     scheduled.add(key);
 
@@ -52,12 +49,27 @@ export async function scheduleAlarmsForPendingTasks(tasks: Task[]): Promise<void
     try {
       await fireIntent(hour, minute, task.name);
     } catch {
-      scheduled.delete(key); // allow retry on next refresh
+      scheduled.delete(key);
     }
   }
 }
 
-// Call when an interval task is completed so its alarm re-schedules next time it appears.
+// Called on interval task completion — sets alarm for now + interval.
+export async function scheduleIntervalAlarm(task: Task): Promise<void> {
+  if (Platform.OS !== 'android') return;
+  if (!task.alarm_settings || task.alarm_settings.type !== 'on_reset') return;
+  if (task.schedule.kind !== 'interval') return;
+
+  const { value, unit } = task.schedule;
+  const ms = unit === 'hours' ? value * 3_600_000 : value * 60_000;
+  const trigger = new Date(Date.now() + ms);
+
+  try {
+    await fireIntent(trigger.getHours(), trigger.getMinutes(), task.name);
+  } catch { /* silent */ }
+}
+
 export function clearAlarmTracking(taskId: string): void {
-  scheduled.delete(`${taskId}-interval`);
+  const today = new Date().toISOString().slice(0, 10);
+  scheduled.delete(`${taskId}-${today}`);
 }

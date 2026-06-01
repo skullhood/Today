@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import dayjs from 'dayjs';
 import { getAllTasks, createTask, deleteTask, retireTask, reactivateTask, type TaskCreate } from '@/db/tasks';
 import { getCompletionCountSince, getCompletionsForTask, getLastCompletion, addCompletion, deleteLastCompletion } from '@/db/completions';
-import { clearAlarmTracking } from '@/utils/alarm';
+import { clearAlarmTracking, scheduleIntervalAlarm } from '@/utils/alarm';
 import type { Task, Completion, Schedule } from '@/db/types';
 
 export type TodayTask = Task & { completionsToday: number };
@@ -147,6 +147,8 @@ export const useStore = create<Store>((set, get) => ({
   completeTask(taskId, data) {
     addCompletion(taskId, data);
     clearAlarmTracking(taskId);
+    const task = get().tasks.find(t => t.id === taskId);
+    if (task) scheduleIntervalAlarm(task);
     get().refresh();
   },
 

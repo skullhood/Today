@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Stack } from 'expo-router';
-import { useColorScheme } from 'react-native';
+import { AppState as RNAppState, useColorScheme } from 'react-native';
 import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
 import { initDb } from '@/db';
 import { useStore } from '@/store';
@@ -9,10 +9,22 @@ import '@/task-types';
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const init = useStore(s => s.init);
+  const refresh = useStore(s => s.refresh);
 
   useEffect(() => {
     initDb();
     init();
+
+    const sub = RNAppState.addEventListener('change', state => {
+      if (state === 'active') refresh();
+    });
+
+    const ticker = setInterval(refresh, 30_000);
+
+    return () => {
+      sub.remove();
+      clearInterval(ticker);
+    };
   }, []);
 
   return (
