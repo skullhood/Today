@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { t } from '@/i18n';
 import type { Task, Completion, Schedule } from './types';
 
 export type TaskStats = {
@@ -36,7 +37,7 @@ function completionsOnDay(
 function formatMinutes(totalMinutes: number): string {
   const h = Math.floor(totalMinutes / 60) % 24;
   const m = Math.round(totalMinutes % 60);
-  const suffix = h >= 12 ? 'PM' : 'AM';
+  const suffix = h >= 12 ? t.taskHistory.ampm.pm : t.taskHistory.ampm.am;
   const displayH = h % 12 === 0 ? 12 : h % 12;
   return `${displayH}:${String(m).padStart(2, '0')} ${suffix}`;
 }

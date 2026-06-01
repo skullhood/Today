@@ -14,9 +14,10 @@ import { ThemedView } from '@/components/themed-view';
 import { useStore } from '@/store';
 import { CARD_COLORS, TASK_ICONS, randomColor, contrastText, type TaskIcon } from '@/constants/palette';
 import { getAllTaskTypes } from '@/task-types/registry';
+import { t } from '@/i18n';
 import type { Schedule, AlarmConfig } from '@/db/types';
 
-const WEEKDAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const WEEKDAY_LABELS = t.newTask.weekdays;
 type ScheduleKind = 'daily' | 'weekdays' | 'persistent' | 'interval';
 
 // ─── Time helpers ────────────────────────────────────────────────────────────
@@ -205,34 +206,34 @@ export default function NewTaskScreen() {
             <MaterialIcons name={icon as any} size={28} color={previewText} />
           </View>
           <ThemedText style={[styles.previewName, { color: previewText }]} numberOfLines={1}>
-            {name || 'Task name'}
+            {name || t.newTask.placeholders.taskName}
           </ThemedText>
         </View>
 
-        <ThemedText style={[styles.label, { color: sectionLabel }]}>NAME</ThemedText>
+        <ThemedText style={[styles.label, { color: sectionLabel }]}>{t.newTask.labels.name}</ThemedText>
         <TextInput
           style={[styles.input, { backgroundColor: inputBg, color: inputColor }]}
-          placeholder="What do you need to do?"
+          placeholder={t.newTask.placeholders.name}
           placeholderTextColor={isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)'}
           value={name} onChangeText={setName} returnKeyType="next" autoFocus
         />
 
-        <ThemedText style={[styles.label, { color: sectionLabel }]}>DESCRIPTION (OPTIONAL)</ThemedText>
+        <ThemedText style={[styles.label, { color: sectionLabel }]}>{t.newTask.labels.description}</ThemedText>
         <TextInput
           style={[styles.input, styles.descriptionInput, { backgroundColor: inputBg, color: inputColor }]}
-          placeholder="Add notes or details..."
+          placeholder={t.newTask.placeholders.description}
           placeholderTextColor={isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)'}
           value={description} onChangeText={setDescription} multiline blurOnSubmit
         />
 
-        <ThemedText style={[styles.label, { color: sectionLabel }]}>COLOR</ThemedText>
+        <ThemedText style={[styles.label, { color: sectionLabel }]}>{t.newTask.labels.color}</ThemedText>
         <View style={styles.colorGrid}>
           {CARD_COLORS.map(c => (
             <TouchableOpacity key={c} style={[styles.colorSwatch, { backgroundColor: c }, color === c && styles.colorSelected]} onPress={() => setColor(c)} />
           ))}
         </View>
 
-        <ThemedText style={[styles.label, { color: sectionLabel }]}>ICON</ThemedText>
+        <ThemedText style={[styles.label, { color: sectionLabel }]}>{t.newTask.labels.icon}</ThemedText>
         <View style={styles.iconGrid}>
           {TASK_ICONS.map(ic => (
             <TouchableOpacity key={ic} style={[styles.iconOption, { backgroundColor: inputBg }, icon === ic && { backgroundColor: color }]} onPress={() => setIcon(ic)}>
@@ -241,7 +242,7 @@ export default function NewTaskScreen() {
           ))}
         </View>
 
-        <ThemedText style={[styles.label, { color: sectionLabel }]}>SCHEDULE</ThemedText>
+        <ThemedText style={[styles.label, { color: sectionLabel }]}>{t.newTask.labels.schedule}</ThemedText>
         <View style={styles.scheduleGrid}>
           {(['daily', 'weekdays', 'persistent', 'interval'] as ScheduleKind[]).map(kind => (
             <TouchableOpacity
@@ -250,7 +251,7 @@ export default function NewTaskScreen() {
               onPress={() => setScheduleKind(kind)}
             >
               <ThemedText style={[styles.scheduleOptionText, { color: scheduleKind === kind ? previewText : inputColor }]}>
-                {kind === 'daily' ? 'Daily' : kind === 'weekdays' ? 'Days' : kind === 'persistent' ? 'One-time' : 'Interval'}
+                {kind === 'daily' ? t.newTask.schedule.daily : kind === 'weekdays' ? t.newTask.schedule.days : kind === 'persistent' ? t.newTask.schedule.oneTime : t.newTask.schedule.interval}
               </ThemedText>
             </TouchableOpacity>
           ))}
@@ -268,7 +269,7 @@ export default function NewTaskScreen() {
 
         {scheduleKind === 'persistent' && (
           <ThemedText style={[styles.hint, { color: sectionLabel }]}>
-            Stays on your list until completed once, then moves to the Log.
+            {t.newTask.hints.persistent}
           </ThemedText>
         )}
 
@@ -287,7 +288,7 @@ export default function NewTaskScreen() {
               {(['hours', 'minutes'] as const).map(unit => (
                 <TouchableOpacity key={unit} style={[styles.unitOption, intervalUnit === unit && { backgroundColor: color }]} onPress={() => setIntervalUnit(unit)}>
                   <ThemedText style={[styles.unitText, { color: intervalUnit === unit ? previewText : inputColor }]}>
-                    {unit === 'hours' ? 'hrs' : 'min'}
+                    {unit === 'hours' ? t.newTask.interval.hrs : t.newTask.interval.min}
                   </ThemedText>
                 </TouchableOpacity>
               ))}
@@ -298,7 +299,7 @@ export default function NewTaskScreen() {
         {/* Advanced Time Settings */}
         {showAdvancedSection && (
           <TouchableOpacity style={styles.advancedToggle} onPress={() => setShowAdvanced(v => !v)} activeOpacity={0.7}>
-            <ThemedText style={[styles.advancedLabel, { color: sectionLabel }]}>ADVANCED TIME SETTINGS</ThemedText>
+            <ThemedText style={[styles.advancedLabel, { color: sectionLabel }]}>{t.newTask.labels.advancedTime}</ThemedText>
             <MaterialIcons name={showAdvanced ? 'expand-less' : 'expand-more'} size={18} color={sectionLabel} />
           </TouchableOpacity>
         )}
@@ -307,7 +308,7 @@ export default function NewTaskScreen() {
           <>
             {showResetTime && (
               <>
-                <ThemedText style={[styles.label, { color: sectionLabel }]}>RESET TIME</ThemedText>
+                <ThemedText style={[styles.label, { color: sectionLabel }]}>{t.newTask.labels.resetTime}</ThemedText>
                 <TimePicker
                   hour={resetHour} minute={resetMinute}
                   onChange={handleResetChange}
@@ -315,20 +316,20 @@ export default function NewTaskScreen() {
                   accentBg={color} accentText={previewText}
                 />
                 <ThemedText style={[styles.hint, { color: sectionLabel }]}>
-                  Task reappears on your list at this time each day.
+                  {t.newTask.hints.resetTime}
                 </ThemedText>
               </>
             )}
 
             <View style={styles.alarmHeader}>
-              <ThemedText style={[styles.label, { color: sectionLabel, marginTop: 16 }]}>ALARM</ThemedText>
+              <ThemedText style={[styles.label, { color: sectionLabel, marginTop: 16 }]}>{t.newTask.labels.alarm}</ThemedText>
               <TouchableOpacity
                 style={[styles.alarmToggle, { backgroundColor: alarmEnabled ? color : inputBg }]}
                 onPress={() => setAlarmEnabled(v => !v)}
                 activeOpacity={0.8}
               >
                 <ThemedText style={[styles.alarmToggleText, { color: alarmEnabled ? previewText : inputColor }]}>
-                  {alarmEnabled ? 'On' : 'Off'}
+                  {alarmEnabled ? t.newTask.alarm.on : t.newTask.alarm.off}
                 </ThemedText>
               </TouchableOpacity>
             </View>
@@ -337,10 +338,10 @@ export default function NewTaskScreen() {
               <>
                 {canDeadline && (
                   <View style={[styles.segmented, { backgroundColor: inputBg }]}>
-                    {(['deadline', 'on_reset'] as const).map(t => (
-                      <TouchableOpacity key={t} style={[styles.segment, alarmType === t && { backgroundColor: color }]} onPress={() => setAlarmType(t)}>
-                        <ThemedText style={[styles.segmentText, { color: alarmType === t ? previewText : inputColor }]}>
-                          {t === 'deadline' ? 'Deadline Alarm' : 'On Reset'}
+                    {(['deadline', 'on_reset'] as const).map(aType => (
+                      <TouchableOpacity key={aType} style={[styles.segment, alarmType === aType && { backgroundColor: color }]} onPress={() => setAlarmType(aType)}>
+                        <ThemedText style={[styles.segmentText, { color: alarmType === aType ? previewText : inputColor }]}>
+                          {aType === 'deadline' ? t.newTask.alarm.deadline : t.newTask.alarm.onReset}
                         </ThemedText>
                       </TouchableOpacity>
                     ))}
@@ -350,14 +351,14 @@ export default function NewTaskScreen() {
                 {(alarmType === 'on_reset' || !canDeadline) && (
                   <ThemedText style={[styles.hint, { color: sectionLabel }]}>
                     {scheduleKind === 'interval'
-                      ? 'Alarm fires each time the interval elapses.'
-                      : 'Alarm fires when the task resets and appears on your list.'}
+                      ? t.newTask.hints.intervalOnReset
+                      : t.newTask.hints.onResetAlarm}
                   </ThemedText>
                 )}
 
                 {alarmType === 'deadline' && canDeadline && (
                   <>
-                    <ThemedText style={[styles.label, { color: sectionLabel }]}>DEADLINE TIME</ThemedText>
+                    <ThemedText style={[styles.label, { color: sectionLabel }]}>{t.newTask.labels.deadlineTime}</ThemedText>
                     <TimePicker
                       hour={deadlineHour} minute={deadlineMinute}
                       minTotalMin={resetTotalMin}
@@ -366,7 +367,7 @@ export default function NewTaskScreen() {
                       accentBg={color} accentText={previewText}
                     />
                     <ThemedText style={[styles.hint, { color: sectionLabel }]}>
-                      Alert fires at this time if the task isn't completed yet.
+                      {t.newTask.hints.deadlineTime}
                     </ThemedText>
                   </>
                 )}
@@ -381,7 +382,7 @@ export default function NewTaskScreen() {
           disabled={!name.trim()}
           activeOpacity={0.85}
         >
-          <ThemedText style={[styles.createText, { color: previewText }]}>Create Task</ThemedText>
+          <ThemedText style={[styles.createText, { color: previewText }]}>{t.newTask.createButton}</ThemedText>
         </TouchableOpacity>
 
       </ScrollView>

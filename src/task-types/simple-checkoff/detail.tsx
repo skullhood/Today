@@ -2,6 +2,7 @@ import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-nat
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { contrastText } from '@/constants/palette';
+import { t } from '@/i18n';
 import type { DetailScreenProps } from '../registry';
 
 export function SimpleCheckoffDetail({
@@ -18,11 +19,11 @@ export function SimpleCheckoffDetail({
 
   function confirmRetire() {
     Alert.alert(
-      'Retire Task',
-      'Remove this task from your list? Your history is kept.',
+      t.taskDetail.confirm.retireTitle,
+      t.taskDetail.confirm.retireMessage,
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Retire', onPress: onRetire },
+        { text: t.common.cancel, style: 'cancel' },
+        { text: t.common.retire, onPress: onRetire },
       ]
     );
   }
@@ -46,8 +47,8 @@ export function SimpleCheckoffDetail({
       <View style={styles.actions}>
         <ThemedText style={[styles.statusLabel, { color: textColor }]}>
           {isDone
-            ? isPersistent ? 'Done' : 'Done for today'
-            : 'Not yet completed'}
+            ? isPersistent ? t.taskDetail.status.done : t.taskDetail.status.doneToday
+            : t.taskDetail.status.notCompleted}
         </ThemedText>
 
         {isDone ? (
@@ -56,7 +57,7 @@ export function SimpleCheckoffDetail({
             onPress={onUncomplete}
             activeOpacity={0.8}
           >
-            <ThemedText style={[styles.primaryBtnText, { color: textColor }]}>Undo</ThemedText>
+            <ThemedText style={[styles.primaryBtnText, { color: textColor }]}>{t.taskDetail.actions.undo}</ThemedText>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
@@ -65,7 +66,7 @@ export function SimpleCheckoffDetail({
             activeOpacity={0.8}
           >
             <ThemedText style={[styles.primaryBtnText, { color: textColor }]}>
-              Mark Complete
+              {t.taskDetail.actions.markComplete}
             </ThemedText>
           </TouchableOpacity>
         )}
@@ -75,7 +76,7 @@ export function SimpleCheckoffDetail({
           onPress={confirmRetire}
           activeOpacity={0.7}
         >
-          <ThemedText style={[styles.secondaryBtnText, { color: textColor }]}>Retire</ThemedText>
+          <ThemedText style={[styles.secondaryBtnText, { color: textColor }]}>{t.taskDetail.actions.retire}</ThemedText>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

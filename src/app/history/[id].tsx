@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useStore } from '@/store';
 import { getTaskType } from '@/task-types/registry';
 import { ThemedText } from '@/components/themed-text';
+import { t as i18n } from '@/i18n';
 
 export default function TaskHistoryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -17,7 +18,7 @@ export default function TaskHistoryScreen() {
   if (!task) {
     return (
       <View style={styles.center}>
-        <ThemedText>Task not found.</ThemedText>
+        <ThemedText>{i18n.common.taskNotFound}</ThemedText>
       </View>
     );
   }
@@ -26,36 +27,29 @@ export default function TaskHistoryScreen() {
   if (!taskType) {
     return (
       <View style={styles.center}>
-        <ThemedText>Unknown task type: {task.type}</ThemedText>
+        <ThemedText>{i18n.common.unknownType(task.type)}</ThemedText>
       </View>
     );
   }
 
   function handleDelete() {
     Alert.alert(
-      'Delete Task',
-      `Delete "${task!.name}" and all its history? This cannot be undone.`,
+      i18n.historyDetail.confirm.deleteTitle,
+      i18n.historyDetail.confirm.deleteMessage(task!.name),
       [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            removeTask(id);
-            router.back();
-          },
-        },
+        { text: i18n.common.cancel, style: 'cancel' },
+        { text: i18n.common.delete, style: 'destructive', onPress: () => { removeTask(id); router.back(); } },
       ]
     );
   }
 
   function handleRetire() {
     Alert.alert(
-      'Retire Task',
-      `Retire "${task!.name}"? It will no longer appear in your list but your history is kept.`,
+      i18n.historyDetail.confirm.retireTitle,
+      i18n.historyDetail.confirm.retireMessage(task!.name),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Retire', onPress: () => { retireTask(id); router.back(); } },
+        { text: i18n.common.cancel, style: 'cancel' },
+        { text: i18n.common.retire, onPress: () => { retireTask(id); router.back(); } },
       ]
     );
   }

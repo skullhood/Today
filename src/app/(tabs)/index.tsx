@@ -9,6 +9,7 @@ import { ThemedView } from '@/components/themed-view';
 import { useStore, type TodayTask } from '@/store';
 import { scheduleAlarmsForPendingTasks } from '@/utils/alarm';
 import { useTheme } from '@/hooks/use-theme';
+import { t } from '@/i18n';
 import dayjs from 'dayjs';
 
 type Tab = 'pending' | 'completed';
@@ -44,15 +45,15 @@ export default function TodayScreen() {
   }, [todayTasks]);
 
   const emptyText = query.trim()
-    ? 'No results.'
-    : tab === 'pending' ? 'Nothing left to do today.' : 'Nothing completed yet.';
+    ? t.common.noResults
+    : tab === 'pending' ? t.today.emptyPending : t.today.emptyCompleted;
 
   return (
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
         <View style={styles.header}>
           <View>
-            <ThemedText style={styles.heading}>Today</ThemedText>
+            <ThemedText style={styles.heading}>{t.today.heading}</ThemedText>
             <ThemedText style={styles.date}>{dateLabel}</ThemedText>
           </View>
           <TouchableOpacity
@@ -65,15 +66,15 @@ export default function TodayScreen() {
         </View>
 
         <View style={[styles.segmented, { backgroundColor: colors.backgroundElement }]}>
-          {(['pending', 'completed'] as Tab[]).map(t => (
+          {(['pending', 'completed'] as Tab[]).map(key => (
             <TouchableOpacity
-              key={t}
-              style={[styles.segment, tab === t && { backgroundColor: colors.background }]}
-              onPress={() => { setTab(t); setQuery(''); }}
+              key={key}
+              style={[styles.segment, tab === key && { backgroundColor: colors.background }]}
+              onPress={() => { setTab(key); setQuery(''); }}
               activeOpacity={0.7}
             >
-              <ThemedText style={[styles.segmentText, tab !== t && { opacity: 0.45 }]}>
-                {t === 'pending' ? 'Pending' : 'Completed'}
+              <ThemedText style={[styles.segmentText, tab !== key && { opacity: 0.45 }]}>
+                {key === 'pending' ? t.today.pending : t.today.completed}
               </ThemedText>
             </TouchableOpacity>
           ))}
@@ -84,7 +85,7 @@ export default function TodayScreen() {
             <MaterialIcons name="search" size={18} color={colors.textSecondary} />
             <TextInput
               style={[styles.searchInput, { color: colors.text }]}
-              placeholder="Search completed..."
+              placeholder={t.today.searchPlaceholder}
               placeholderTextColor={colors.textSecondary}
               value={query}
               onChangeText={setQuery}

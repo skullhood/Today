@@ -5,6 +5,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
 import { initDb } from '@/db';
 import { useStore } from '@/store';
 import '@/task-types';
+import '@/i18n'; // initialise locale + dayjs language
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();

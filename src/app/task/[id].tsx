@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { useStore } from '@/store';
 import { getTaskType } from '@/task-types/registry';
 import { ThemedText } from '@/components/themed-text';
+import { t } from '@/i18n';
 
 export default function TaskDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -17,7 +18,7 @@ export default function TaskDetailScreen() {
   if (!task) {
     return (
       <View style={styles.center}>
-        <ThemedText>Task not found.</ThemedText>
+        <ThemedText>{t.common.taskNotFound}</ThemedText>
       </View>
     );
   }
@@ -26,7 +27,7 @@ export default function TaskDetailScreen() {
   if (!taskType) {
     return (
       <View style={styles.center}>
-        <ThemedText>Unknown task type: {task.type}</ThemedText>
+        <ThemedText>{t.common.unknownType(task.type)}</ThemedText>
       </View>
     );
   }

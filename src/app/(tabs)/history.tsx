@@ -11,6 +11,7 @@ import { contrastText } from '@/constants/palette';
 import { getAllCompletionEntries } from '@/db/completions';
 import { exportData } from '@/db/export';
 import { useStore } from '@/store';
+import { t } from '@/i18n';
 import type { CompletionEntry, Task } from '@/db/types';
 
 type LogTab = 'tasks' | 'history';
@@ -27,7 +28,7 @@ function TaskRow({ task, onPress, colors }: { task: Task; onPress: () => void; c
       <ThemedText style={[styles.taskRowName, { color: text }]} numberOfLines={1}>{task.name}</ThemedText>
       {task.retired_at && (
         <View style={[styles.retiredBadge, { backgroundColor: 'rgba(0,0,0,0.15)' }]}>
-          <ThemedText style={[styles.retiredBadgeText, { color: text }]}>Retired</ThemedText>
+          <ThemedText style={[styles.retiredBadgeText, { color: text }]}>{t.common.retired}</ThemedText>
         </View>
       )}
       <MaterialIcons name="chevron-right" size={18} color={text} style={{ opacity: 0.4 }} />
@@ -42,8 +43,8 @@ type Section = { title: string; data: CompletionEntry[] };
 function dateLabel(iso: string): string {
   const d = dayjs(iso);
   const today = dayjs().startOf('day');
-  if (d.isSame(today, 'day')) return 'Today';
-  if (d.isSame(today.subtract(1, 'day'), 'day')) return 'Yesterday';
+  if (d.isSame(today, 'day')) return t.log.dateLabels.today;
+  if (d.isSame(today.subtract(1, 'day'), 'day')) return t.log.dateLabels.yesterday;
   if (d.isAfter(today.subtract(7, 'day'))) return d.format('dddd');
   return d.format('MMMM D, YYYY');
 }
@@ -105,7 +106,7 @@ export default function LogScreen() {
       <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
 
         <View style={styles.header}>
-          <ThemedText style={styles.heading}>Log</ThemedText>
+          <ThemedText style={styles.heading}>{t.log.heading}</ThemedText>
           <TouchableOpacity onPress={exportData} hitSlop={12} style={[styles.exportBtn, { backgroundColor: colors.backgroundElement }]}>
             <MaterialIcons name="ios-share" size={20} color={colors.text} />
           </TouchableOpacity>
@@ -113,15 +114,15 @@ export default function LogScreen() {
 
         {/* Segment */}
         <View style={[styles.segmented, { backgroundColor: colors.backgroundElement }]}>
-          {(['tasks', 'history'] as LogTab[]).map(t => (
+          {(['tasks', 'history'] as LogTab[]).map(key => (
             <TouchableOpacity
-              key={t}
-              style={[styles.segment, logTab === t && { backgroundColor: colors.background }]}
-              onPress={() => { setLogTab(t); setQuery(''); }}
+              key={key}
+              style={[styles.segment, logTab === key && { backgroundColor: colors.background }]}
+              onPress={() => { setLogTab(key); setQuery(''); }}
               activeOpacity={0.7}
             >
-              <ThemedText style={[styles.segmentText, logTab !== t && { opacity: 0.45 }]}>
-                {t === 'tasks' ? 'Tasks' : 'History'}
+              <ThemedText style={[styles.segmentText, logTab !== key && { opacity: 0.45 }]}>
+                {key === 'tasks' ? t.log.tabs.tasks : t.log.tabs.history}
               </ThemedText>
             </TouchableOpacity>
           ))}
@@ -132,7 +133,7 @@ export default function LogScreen() {
           <MaterialIcons name="search" size={18} color={colors.textSecondary} />
           <TextInput
             style={[styles.searchInput, { color: colors.text }]}
-            placeholder={logTab === 'tasks' ? 'Search tasks...' : 'Search history...'}
+            placeholder={logTab === 'tasks' ? t.log.searchTasks : t.log.searchHistory}
             placeholderTextColor={colors.textSecondary}
             value={query}
             onChangeText={setQuery}
@@ -148,7 +149,7 @@ export default function LogScreen() {
         {logTab === 'tasks' ? (
           filteredTasks.length === 0 ? (
             <View style={styles.empty}>
-              <ThemedText style={styles.emptyText}>{query ? 'No results.' : 'No tasks yet.'}</ThemedText>
+              <ThemedText style={styles.emptyText}>{query ? t.common.noResults : t.log.emptyTasks}</ThemedText>
             </View>
           ) : (
             <FlatList
@@ -168,7 +169,7 @@ export default function LogScreen() {
         ) : (
           sections.length === 0 ? (
             <View style={styles.empty}>
-              <ThemedText style={styles.emptyText}>{query ? 'No results.' : 'No completions yet.'}</ThemedText>
+              <ThemedText style={styles.emptyText}>{query ? t.common.noResults : t.log.emptyHistory}</ThemedText>
             </View>
           ) : (
             <SectionList

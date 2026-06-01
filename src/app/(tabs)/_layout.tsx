@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useColorScheme } from 'react-native';
 import { Colors } from '@/constants/theme';
+import { t } from '@/i18n';
 
 export default function TabsLayout() {
   const scheme = useColorScheme();
@@ -23,7 +24,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Today',
+          title: t.today.heading,
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="today" size={size} color={color} />
           ),
@@ -32,7 +33,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="history"
         options={{
-          title: 'Log',
+          title: t.log.heading,
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="menu-book" size={size} color={color} />
           ),

@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import { ThemedText } from '@/components/themed-text';
 import { computeStats, getMonthCompletionMap, isActiveDay } from '@/db/stats';
 import { contrastText } from '@/constants/palette';
+import { t } from '@/i18n';
 import type { HistoryScreenProps } from '../registry';
 import type { Task } from '@/db/types';
 
@@ -131,7 +132,7 @@ export function SimpleCheckoffHistory({ task, completions, onRetire, onReactivat
               <ThemedText style={[styles.taskName, { color: text }]}>{task.name}</ThemedText>
               {task.retired_at && (
                 <View style={[styles.retiredBadge, { backgroundColor: cardBg }]}>
-                  <ThemedText style={[styles.retiredBadgeText, { color: text }]}>Retired</ThemedText>
+                  <ThemedText style={[styles.retiredBadgeText, { color: text }]}>{t.common.retired}</ThemedText>
                 </View>
               )}
             </View>
@@ -183,39 +184,26 @@ export function SimpleCheckoffHistory({ task, completions, onRetire, onReactivat
           <View style={styles.statsGrid}>
             {task.schedule.kind === 'persistent' ? (
               <>
+                <StatCard label={t.taskHistory.stats.created} value={dayjs(task.created_at).format('MMM D, YYYY')} textColor={text} bgColor={cardBg} />
                 <StatCard
-                  label="Created"
-                  value={dayjs(task.created_at).format('MMM D, YYYY')}
-                  textColor={text}
-                  bgColor={cardBg}
-                />
-                <StatCard
-                  label="Completed"
-                  value={completions[0]
-                    ? dayjs(completions[0].completed_at).format('MMM D, YYYY')
-                    : 'Pending'}
-                  textColor={text}
-                  bgColor={cardBg}
+                  label={t.taskHistory.stats.completed}
+                  value={completions[0] ? dayjs(completions[0].completed_at).format('MMM D, YYYY') : t.taskHistory.stats.pending}
+                  textColor={text} bgColor={cardBg}
                 />
                 {completions[0] && (
-                  <StatCard
-                    label="Time"
-                    value={dayjs(completions[0].completed_at).format('h:mm A')}
-                    textColor={text}
-                    bgColor={cardBg}
-                  />
+                  <StatCard label={t.taskHistory.stats.time} value={dayjs(completions[0].completed_at).format('h:mm A')} textColor={text} bgColor={cardBg} />
                 )}
               </>
             ) : (
               <>
-                <StatCard label="Created" value={dayjs(task.created_at).format('MMM D, YYYY')} textColor={text} bgColor={cardBg} />
-                <StatCard label="Current Streak" value={`${stats.currentStreak} day${stats.currentStreak !== 1 ? 's' : ''}`} textColor={text} bgColor={cardBg} />
-                <StatCard label="Longest Streak" value={`${stats.longestStreak} day${stats.longestStreak !== 1 ? 's' : ''}`} textColor={text} bgColor={cardBg} />
-                <StatCard label="Total" value={String(stats.totalCompletions)} textColor={text} bgColor={cardBg} />
-                <StatCard label="Avg / Week" value={stats.avgPerWeek.toFixed(1)} textColor={text} bgColor={cardBg} />
-                {stats.earliestTime && <StatCard label="Earliest" value={stats.earliestTime} textColor={text} bgColor={cardBg} />}
-                {stats.latestTime && <StatCard label="Latest" value={stats.latestTime} textColor={text} bgColor={cardBg} />}
-                {stats.avgTime && <StatCard label="Avg Time" value={stats.avgTime} textColor={text} bgColor={cardBg} />}
+                <StatCard label={t.taskHistory.stats.created} value={dayjs(task.created_at).format('MMM D, YYYY')} textColor={text} bgColor={cardBg} />
+                <StatCard label={t.taskHistory.stats.currentStreak} value={`${stats.currentStreak} ${t.taskHistory.daysUnit(stats.currentStreak)}`} textColor={text} bgColor={cardBg} />
+                <StatCard label={t.taskHistory.stats.longestStreak} value={`${stats.longestStreak} ${t.taskHistory.daysUnit(stats.longestStreak)}`} textColor={text} bgColor={cardBg} />
+                <StatCard label={t.taskHistory.stats.total} value={String(stats.totalCompletions)} textColor={text} bgColor={cardBg} />
+                <StatCard label={t.taskHistory.stats.avgPerWeek} value={stats.avgPerWeek.toFixed(1)} textColor={text} bgColor={cardBg} />
+                {stats.earliestTime && <StatCard label={t.taskHistory.stats.earliest} value={stats.earliestTime} textColor={text} bgColor={cardBg} />}
+                {stats.latestTime && <StatCard label={t.taskHistory.stats.latest} value={stats.latestTime} textColor={text} bgColor={cardBg} />}
+                {stats.avgTime && <StatCard label={t.taskHistory.stats.avgTime} value={stats.avgTime} textColor={text} bgColor={cardBg} />}
               </>
             )}
           </View>
