@@ -1,8 +1,9 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { View, StyleSheet } from 'react-native';
+import { InteractionManager, View, StyleSheet } from 'react-native';
 import { useStore } from '@/store';
 import { getTaskType } from '@/task-types/registry';
 import { ThemedText } from '@/components/themed-text';
+import { scheduleOnResetAlarm } from '@/utils/alarm';
 import { t } from '@/i18n';
 
 export default function TaskDetailScreen() {
@@ -42,6 +43,7 @@ export default function TaskDetailScreen() {
       onComplete={data => {
         completeTask(task.id, data);
         router.back();
+        InteractionManager.runAfterInteractions(() => scheduleOnResetAlarm(task));
       }}
       onUncomplete={() => {
         uncompleteTask(task.id);
